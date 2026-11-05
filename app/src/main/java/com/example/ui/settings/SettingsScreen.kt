@@ -27,7 +27,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -201,7 +201,7 @@ fun SettingsScreen(
                     )
                 }
 
-                Divider(color = Color(0xFFF1F3F4), modifier = Modifier.padding(vertical = 10.dp))
+                HorizontalDivider(color = Color(0xFFF1F3F4), modifier = Modifier.padding(vertical = 10.dp))
 
                 // Dark Theme toggle
                 Row(
@@ -231,7 +231,7 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        // Offline Status
+        // Mapping Engine & Offline Caching Info
         Surface(
             shape = RoundedCornerShape(14.dp),
             color = Color(0xFFF1F3F4),
@@ -239,15 +239,25 @@ fun SettingsScreen(
         ) {
             Column(modifier = Modifier.padding(14.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(imageVector = Icons.Default.WifiOff, contentDescription = null, tint = Color(0xFF5F6368), modifier = Modifier.size(18.dp))
+                    Icon(
+                        imageVector = if (isOnline) Icons.Default.Layers else Icons.Default.WifiOff,
+                        contentDescription = null,
+                        tint = if (isOnline) Color(0xFF15803D) else Color(0xFF5F6368),
+                        modifier = Modifier.size(18.dp)
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "حالة العمل بدون نت:", style = MaterialTheme.typography.titleSmall, color = Color(0xFF202124), fontWeight = FontWeight.Bold)
+                    Text(
+                        text = if (isOnline) "حالة الاتصال: متصل بالإنترنت (Online)" else "حالة الاتصال: بدون إنترنت (Offline)",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = if (isOnline) Color(0xFF15803D) else Color(0xFF202124),
+                        fontWeight = FontWeight.Bold
+                    )
                 }
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "جميع خرائط محافظات ومراكز ومعالم ومسارات مصر تعمل محلياً 100% دون الحاجة إلى الإنترنت. عند اتصال الجهاز بالشبكة، يتم البحث التلقائي عن تفاصيل موسوعية إضافية.",
+                    text = "• محرك الخرائط: OpenStreetMap الحقيقي مع دعم شوارع مصر، المباني، الجسور، ومحافظات النيل.\n• التخزين المؤقت: يتم حفظ البلاطات والخرائط تلقائياً على ذاكرة الجهاز للعمل عند انقطاع الإنترنت.\n• الملاحة: محرك OSRM الحسابي لتوجيه الطرق الواقعية والانعطافات خطوة بخطوة للسيارات والمشاة والدراجات.\n• البحث: دمج بين البحث الجغرافي المباشر وقاعدة بيانات المراكز والمحافظات المصرية.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF5F6368)
+                    color = Color(0xFF475569)
                 )
             }
         }

@@ -1,5 +1,8 @@
 package com.example.ui.map
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -9,29 +12,35 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LocalCafe
 import androidx.compose.material.icons.filled.LocalGasStation
 import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.LocalParking
 import androidx.compose.material.icons.filled.LocationCity
 import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,17 +54,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.data.model.CityLabel
 import com.example.data.model.ServiceType
+import com.example.data.network.SearchResultItem
 import com.example.ui.theme.GoogleMapsBlue
 
 @Composable
 fun MapTopBarAndControls(
     modifier: Modifier = Modifier,
     searchQuery: String,
+    searchResults: List<SearchResultItem> = emptyList(),
+    isSearching: Boolean = false,
     selectedServiceType: ServiceType?,
     onSearchChange: (String) -> Unit,
+    onSelectSearchResult: (SearchResultItem) -> Unit,
     onSelectServiceType: (ServiceType?) -> Unit,
     onSelectGovernorate: (CityLabel) -> Unit,
     onResetView: () -> Unit
@@ -65,56 +79,133 @@ fun MapTopBarAndControls(
             .fillMaxWidth()
             .padding(top = 10.dp, start = 12.dp, end = 12.dp)
     ) {
-        // Floating Google Maps Style Search Card
+        // Floating Search Bar Card
         Card(
             shape = RoundedCornerShape(26.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 14.dp, vertical = 2.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "بحث",
-                    tint = Color(0xFF5F6368),
-                    modifier = Modifier.size(24.dp)
-                )
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "بحث",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(24.dp)
+                    )
 
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = onSearchChange,
-                    placeholder = {
-                        Text(
-                            text = "ابحث عن أي محافظة، مركز، حي، أو مكان في مصر...",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color(0xFF70757A)
-                        )
-                    },
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        focusedTextColor = Color(0xFF202124),
-                        unfocusedTextColor = Color(0xFF202124)
-                    ),
-                    modifier = Modifier.weight(1f)
-                )
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = onSearchChange,
+                        placeholder = {
+                            Text(
+                                text = "ابحث عن أي شارع، محافظة، معلم، أو مستشفى...",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        },
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            focusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = Color.Transparent,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.weight(1f)
+                    )
 
-                if (searchQuery.isNotEmpty()) {
-                    IconButton(onClick = { onSearchChange("") }) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "مسح",
-                            tint = Color(0xFF70757A),
-                            modifier = Modifier.size(20.dp)
+                    if (isSearching) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .size(20.dp)
+                                .padding(2.dp),
+                            strokeWidth = 2.dp,
+                            color = GoogleMapsBlue
                         )
+                        Spacer(modifier = Modifier.width(6.dp))
+                    }
+
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { onSearchChange("") }) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = "مسح",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
+
+                // Live Search Suggestions Dropdown List
+                AnimatedVisibility(
+                    visible = searchResults.isNotEmpty() && searchQuery.isNotBlank(),
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 260.dp)
+                        ) {
+                            items(searchResults) { item ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            onSelectSearchResult(item)
+                                            onSearchChange("")
+                                        }
+                                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Place,
+                                        contentDescription = null,
+                                        tint = GoogleMapsBlue,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = item.titleAr,
+                                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            text = item.subtitleAr,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                    Surface(
+                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                        shape = RoundedCornerShape(8.dp)
+                                    ) {
+                                        Text(
+                                            text = item.categoryAr,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                        )
+                                    }
+                                }
+                                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                            }
+                        }
                     }
                 }
             }
@@ -122,7 +213,7 @@ fun MapTopBarAndControls(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Horizontal Governorates Quick Jump Bar (Directly zoom into any of Egypt's 27 governorates)
+        // Horizontal Governorates Quick Jump Bar
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -132,9 +223,9 @@ fun MapTopBarAndControls(
             EgyptMapData.ALL_EGYPT_GOVERNORATES.forEach { gov ->
                 Surface(
                     shape = RoundedCornerShape(16.dp),
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.surface,
                     shadowElevation = 2.dp,
-                    border = BorderStroke(1.dp, Color(0xFFDADCE0)),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                     modifier = Modifier.clickable { onSelectGovernorate(gov) }
                 ) {
                     Row(
@@ -152,7 +243,7 @@ fun MapTopBarAndControls(
                             text = gov.nameAr,
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = if (gov.isCapital) FontWeight.Bold else FontWeight.Medium,
-                            color = Color(0xFF202124)
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -231,9 +322,9 @@ private fun ServiceQuickChip(
 ) {
     Surface(
         shape = RoundedCornerShape(20.dp),
-        color = if (isSelected) GoogleMapsBlue else Color.White,
+        color = if (isSelected) GoogleMapsBlue else MaterialTheme.colorScheme.surface,
         shadowElevation = 3.dp,
-        border = BorderStroke(1.dp, if (isSelected) GoogleMapsBlue else Color(0xFFE0E0E0)),
+        border = BorderStroke(1.dp, if (isSelected) GoogleMapsBlue else MaterialTheme.colorScheme.outlineVariant),
         modifier = Modifier.clickable { onClick() }
     ) {
         Row(
@@ -251,7 +342,7 @@ private fun ServiceQuickChip(
                 text = title,
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                color = if (isSelected) Color.White else Color(0xFF3C4043)
+                color = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -260,21 +351,39 @@ private fun ServiceQuickChip(
 @Composable
 fun MapZoomAndLocationControls(
     modifier: Modifier = Modifier,
+    mapTileType: MapTileType = MapTileType.STANDARD,
+    onCycleMapTileType: () -> Unit = {},
     onZoomIn: () -> Unit,
     onZoomOut: () -> Unit,
-    onResetView: () -> Unit
+    onCenterOnUserLocation: () -> Unit
 ) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Map Tile Type Switcher Button (OSM Standard, Carto Light, Dark, Topo)
+        FloatingActionButton(
+            onClick = onCycleMapTileType,
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = Color(0xFF1E88E5),
+            elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp),
+            shape = CircleShape,
+            modifier = Modifier.size(46.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Layers,
+                contentDescription = "تبديل نمط الخريطة (${mapTileType.titleAr})",
+                modifier = Modifier.size(22.dp)
+            )
+        }
+
         // Zoom Controls Card (+ and -)
         Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = Color.White,
+            shape = RoundedCornerShape(14.dp),
+            color = MaterialTheme.colorScheme.surface,
             shadowElevation = 4.dp,
-            border = BorderStroke(1.dp, Color(0xFFE0E0E0))
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
         ) {
             Column {
                 IconButton(
@@ -283,37 +392,37 @@ fun MapZoomAndLocationControls(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription = "تكبير والدخول في المحافظة",
-                        tint = Color(0xFF3C4043)
+                        contentDescription = "تكبير الخريطة",
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
-                Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 1.dp)
                 IconButton(
                     onClick = onZoomOut,
                     modifier = Modifier.size(44.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Remove,
-                        contentDescription = "تصغير",
-                        tint = Color(0xFF3C4043)
+                        contentDescription = "تصغير الخريطة",
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
         }
 
-        // Recenter / Location button
+        // Live GPS / Center on User Location button
         FloatingActionButton(
-            onClick = onResetView,
-            containerColor = Color.White,
-            contentColor = Color(0xFF5F6368),
+            onClick = onCenterOnUserLocation,
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = Color(0xFF1E88E5),
             elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp),
             shape = CircleShape,
-            modifier = Modifier.size(44.dp)
+            modifier = Modifier.size(46.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.MyLocation,
-                contentDescription = "إعادة ضبط الخريطة",
-                modifier = Modifier.size(20.dp)
+                contentDescription = "تحديد موقعي المباشر عبر GPS",
+                modifier = Modifier.size(22.dp)
             )
         }
     }

@@ -434,26 +434,37 @@ object PlacesRepository {
         return direct + districts
     }
 
+    private fun normalizeArabic(text: String): String {
+        return text
+            .replace("[إأآا]".toRegex(), "ا")
+            .replace("ة", "ه")
+            .replace("ى", "ي")
+            .replace("[\u064B-\u065F]".toRegex(), "")
+            .trim()
+            .lowercase()
+    }
+
     fun searchPlaces(query: String): List<Place> {
         if (query.isBlank()) return places
         val clean = query.trim().lowercase()
+        val normQuery = normalizeArabic(query)
 
         val matchedPlaces = places.filter {
-            it.nameAr.contains(clean) ||
+            normalizeArabic(it.nameAr).contains(normQuery) ||
             it.nameEn.lowercase().contains(clean) ||
-            it.governorateAr.contains(clean) ||
-            it.shortDescriptionAr.contains(clean) ||
-            it.namingOriginAr.contains(clean) ||
-            it.historicEventsAr.contains(clean)
+            normalizeArabic(it.governorateAr).contains(normQuery) ||
+            normalizeArabic(it.shortDescriptionAr).contains(normQuery) ||
+            normalizeArabic(it.namingOriginAr).contains(normQuery) ||
+            normalizeArabic(it.historicEventsAr).contains(normQuery)
         }
 
         val matchedDistricts = EgyptMapData.ALL_CENTERS.filter {
-            it.nameAr.contains(clean) ||
-            it.governorateAr.contains(clean) ||
-            it.centerTypeAr.contains(clean) ||
-            it.namingOriginAr.contains(clean) ||
-            it.historicEventsAr.contains(clean) ||
-            it.famousBornAr.contains(clean)
+            normalizeArabic(it.nameAr).contains(normQuery) ||
+            normalizeArabic(it.governorateAr).contains(normQuery) ||
+            normalizeArabic(it.centerTypeAr).contains(normQuery) ||
+            normalizeArabic(it.namingOriginAr).contains(normQuery) ||
+            normalizeArabic(it.historicEventsAr).contains(normQuery) ||
+            normalizeArabic(it.famousBornAr).contains(normQuery)
         }.map { districtToPlace(it) }
 
         return matchedPlaces + matchedDistricts
