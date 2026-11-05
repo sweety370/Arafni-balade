@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">عرفني بلدي</string>
+    <string name="app_tagline">خريطة مصر ومعالمها التفاعلية بدون إنترنت</string>
+    <string name="search_placeholder">ابحث عن محافظة، معلم، أو مدينة...</string>
+    <string name="tab_map">الخريطة</string>
+    <string name="tab_places">دليل الأماكن</string>
+    <string name="tab_routes">المسارات</string>
+    <string name="tab_favorites">المفضلة</string>
+    <string name="tab_settings">الإعدادات</string>
+</resources>
