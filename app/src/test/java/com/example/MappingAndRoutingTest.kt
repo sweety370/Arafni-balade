@@ -103,4 +103,50 @@ class MappingAndRoutingTest {
         // Verify all steps have locations assigned
         assertTrue(resultRoute.steps.all { it.location != null })
     }
+
+    @Test
+    fun egyptGovernoratesCatalog_hasExactly27GovernoratesWithoutDuplicates() {
+        val catalog = com.example.data.model.EgyptGovernoratesCatalog.allGovernorates
+        assertEquals("Must contain exactly 27 governorates", 27, catalog.size)
+
+        // Check uniqueness of names
+        val names = catalog.map { it.nameAr }
+        val uniqueNames = names.distinct()
+        assertEquals("All 27 governorates must have unique names", 27, uniqueNames.size)
+
+        // Verify the 27 official Egyptian governorates are all present
+        val expected = listOf(
+            "القاهرة", "الإسكندرية", "بورسعيد", "السويس", "دمياط", "الدقهلية",
+            "الشرقية", "القليوبية", "كفر الشيخ", "الغربية", "المنوفية", "البحيرة",
+            "الإسماعيلية", "الجيزة", "بني سويف", "الفيوم", "المنيا", "أسيوط",
+            "سوهاج", "قنا", "الأقصر", "أسوان", "البحر الأحمر", "الوادي الجديد",
+            "مطروح", "شمال سيناء", "جنوب سيناء"
+        )
+
+        for (govName in expected) {
+            val found = catalog.find { it.nameAr == govName }
+            assertNotNull("Governorate $govName must exist in catalog", found)
+            assertTrue("Governorate $govName must have valid latitude", found!!.location.latitude in 21.0..32.5)
+            assertTrue("Governorate $govName must have valid longitude", found.location.longitude in 24.5..37.0)
+            assertTrue("Governorate $govName must have capital city", found.capitalCityAr.isNotBlank())
+            assertTrue("Governorate $govName must have area info", found.areaKm2.isNotBlank())
+            assertTrue("Governorate $govName must have population info", found.population.isNotBlank())
+            assertTrue("Governorate $govName must have key centers", found.keyCitiesAndCenters.isNotEmpty())
+            assertTrue("Governorate $govName must have curated places", found.placesList.isNotEmpty())
+        }
+    }
+
+    @Test
+    fun wikipediaService_titleMapping_mapsAllGovernorates() {
+        val mapping = com.example.data.network.WikipediaService.WIKI_TITLE_MAPPING
+        assertTrue("Mapping should cover all governorates", mapping.size >= 27)
+
+        assertEquals("القاهرة", mapping["القاهرة"])
+        assertEquals("الإسكندرية", mapping["الإسكندرية"])
+        assertEquals("محافظة_الجيزة", mapping["الجيزة"])
+        assertEquals("محافظة_الأقصر", mapping["الأقصر"])
+        assertEquals("محافظة_أسوان", mapping["أسوان"])
+        assertEquals("محافظة_جنوب_سيناء", mapping["جنوب سيناء"])
+        assertEquals("محافظة_الوادي_الجديد", mapping["الوادي الجديد"])
+    }
 }

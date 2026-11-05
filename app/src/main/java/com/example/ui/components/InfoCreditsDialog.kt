@@ -46,10 +46,10 @@ fun InfoCreditsDialog(
 ) {
     Dialog(onDismissRequest = onDismissRequest) {
         Card(
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            border = BorderStroke(1.dp, Color(0xFFDADCE0)),
-            elevation = CardDefaults.cardElevation(defaultElevation = 16.dp),
+            shape = RoundedCornerShape(26.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.outlineVariant),
+            elevation = CardDefaults.cardElevation(defaultElevation = 20.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 16.dp)
@@ -62,15 +62,15 @@ fun InfoCreditsDialog(
             ) {
                 // Header Label
                 Surface(
-                    shape = RoundedCornerShape(10.dp),
-                    color = Color(0xFFE8F0FE)
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     Text(
-                        text = "معلومات التطبيق وفريق العمل",
+                        text = "فريق عمل ومشروع عرفني بلدي",
                         style = MaterialTheme.typography.labelSmall,
-                        color = GoogleMapsBlue,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
                     )
                 }
 
@@ -79,86 +79,51 @@ fun InfoCreditsDialog(
                 Text(
                     text = "عرفني بلدي",
                     style = MaterialTheme.typography.headlineMedium,
-                    color = Color(0xFF202124),
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "خريطة ومعالم جمهورية مصر العربية التفاعلية",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF5F6368),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 // Amr Hussein Card (Idea)
                 CreditRoleCard(
                     icon = Icons.Default.Lightbulb,
                     roleTitle = "صاحب الفكرة",
                     name = "عمرو حسين",
-                    description = "صاحب فكرة تطبيق عرفني بلدي لتوثيق معالم مصر جغرافياً وتاريخياً وإتاحتها للمواطنين والزوار بدون إنترنت بدقة عالية.",
-                    badgeColor = GoogleMapsBlue
+                    description = "صاحب فكرة تطبيق عرفني بلدي لتوثيق معالم مصر جغرافياً وتاريخياً وإتاحتها للمواطنين والزوار بدقة عالية.",
+                    badgeColor = MaterialTheme.colorScheme.primary
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 // Mohamed Hussein Card (Developer)
                 CreditRoleCard(
                     icon = Icons.Default.Code,
                     roleTitle = "المبرمج والمطور",
                     name = "محمد حسين",
-                    description = "تطوير وبرمجة التطبيق ومحرك الخرائط ثلاثي الأبعاد 3D وحساب مسارات الملاحة والعمل في وضع عدم الاتصال بالكامل بأحدث تقنيات أندرويد.",
-                    badgeColor = Color(0xFF137333)
+                    description = "تطوير وبرمجة التطبيق ومحركات الخرائط وحساب مسارات الطرق والانعطافات والملاحة الحية بأحدث تقنيات أندرويد.",
+                    badgeColor = Color(0xFF10B981)
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Engine specs
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFFF8F9FA),
-                    border = BorderStroke(1.dp, Color(0xFFE8EAED)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Security,
-                                contentDescription = null,
-                                tint = GoogleMapsBlue,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "مواصفات التشغيل:",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = Color(0xFF202124),
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = "يعمل بالكامل بدون اتصال بالإنترنت (Offline 100%) لجميع المعالم والمسارات.\nيتيح ميزة البحث الموسوعي التلقائي المباشر عند توفر شبكة الإنترنت.\nمبني وفق معايير جوجل ماتيريال ديزاين المعتمدة.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF5F6368),
-                            lineHeight = MaterialTheme.typography.bodySmall.lineHeight
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(22.dp))
 
                 // Close Button
                 Button(
                     onClick = onDismissRequest,
-                    colors = ButtonDefaults.buttonColors(containerColor = GoogleMapsBlue),
-                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                    shape = RoundedCornerShape(14.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = "إغلاق",
                         style = MaterialTheme.typography.labelLarge,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -176,25 +141,25 @@ private fun CreditRoleCard(
     badgeColor: Color
 ) {
     Surface(
-        shape = RoundedCornerShape(14.dp),
-        color = Color(0xFFF8F9FA),
-        border = BorderStroke(1.dp, Color(0xFFE8EAED)),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(34.dp)
+                        .size(36.dp)
                         .clip(CircleShape)
-                        .background(badgeColor.copy(alpha = 0.12f)),
+                        .background(badgeColor.copy(alpha = 0.15f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
                         tint = badgeColor,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
@@ -208,7 +173,7 @@ private fun CreditRoleCard(
                     Text(
                         text = name,
                         style = MaterialTheme.typography.titleMedium,
-                        color = Color(0xFF202124),
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -217,8 +182,9 @@ private fun CreditRoleCard(
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
-                color = Color(0xFF5F6368)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
 }
+

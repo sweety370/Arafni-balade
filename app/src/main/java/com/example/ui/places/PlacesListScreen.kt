@@ -64,7 +64,7 @@ fun PlacesListScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F9FA))
+            .background(MaterialTheme.colorScheme.background)
             .padding(top = 10.dp)
     ) {
         // Search Input
@@ -75,14 +75,14 @@ fun PlacesListScreen(
                 Text(
                     text = "ابحث بالاسم أو المحافظة أو المعلم...",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF70757A)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = null,
-                    tint = Color(0xFF5F6368)
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             },
             trailingIcon = {
@@ -91,18 +91,18 @@ fun PlacesListScreen(
                         Icon(
                             imageVector = Icons.Default.Clear,
                             contentDescription = "مسح",
-                            tint = Color(0xFF5F6368)
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
             },
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                focusedBorderColor = GoogleMapsBlue,
-                unfocusedBorderColor = Color(0xFFDADCE0),
-                focusedTextColor = Color(0xFF202124),
-                unfocusedTextColor = Color(0xFF202124)
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
             ),
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier
@@ -123,12 +123,12 @@ fun PlacesListScreen(
                     onClick = { onSelectCategory(null) },
                     label = { Text("جميع الأماكن") },
                     colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = Color(0xFFE8F0FE),
-                        selectedLabelColor = GoogleMapsBlue,
-                        containerColor = Color.White,
-                        labelColor = Color(0xFF3C4043)
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        labelColor = MaterialTheme.colorScheme.onSurface
                     ),
-                    border = BorderStroke(1.dp, if (selectedCategory == null) GoogleMapsBlue else Color(0xFFDADCE0))
+                    border = BorderStroke(1.dp, if (selectedCategory == null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)
                 )
             }
             items(PlaceCategory.values()) { category ->
@@ -138,12 +138,12 @@ fun PlacesListScreen(
                     onClick = { onSelectCategory(if (isSelected) null else category) },
                     label = { Text(category.titleAr) },
                     colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = Color(0xFFE8F0FE),
-                        selectedLabelColor = GoogleMapsBlue,
-                        containerColor = Color.White,
-                        labelColor = Color(0xFF3C4043)
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        labelColor = MaterialTheme.colorScheme.onSurface
                     ),
-                    border = BorderStroke(1.dp, if (isSelected) GoogleMapsBlue else Color(0xFFDADCE0))
+                    border = BorderStroke(1.dp, if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant)
                 )
             }
         }
@@ -159,8 +159,8 @@ fun PlacesListScreen(
                 val isFav = favoritePlaceIds.contains(place.id)
                 Card(
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    border = BorderStroke(1.dp, Color(0xFFE8EAED)),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -176,7 +176,7 @@ fun PlacesListScreen(
                                 Text(
                                     text = place.nameAr,
                                     style = MaterialTheme.typography.titleMedium,
-                                    color = Color(0xFF202124),
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Row(
@@ -193,7 +193,7 @@ fun PlacesListScreen(
                                     Text(
                                         text = "${place.governorateAr} • ${place.category.titleAr}",
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = Color(0xFF5F6368)
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
@@ -205,7 +205,7 @@ fun PlacesListScreen(
                                 Icon(
                                     imageVector = if (isFav) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
                                     contentDescription = "حفظ",
-                                    tint = if (isFav) GoogleMapsBlue else Color(0xFF70757A),
+                                    tint = if (isFav) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -216,7 +216,7 @@ fun PlacesListScreen(
                         Text(
                             text = place.shortDescriptionAr,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF3C4043),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 2
                         )
 
@@ -229,12 +229,12 @@ fun PlacesListScreen(
                         ) {
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
-                                color = Color(0xFFF1F3F4)
+                                color = MaterialTheme.colorScheme.surfaceVariant
                             ) {
                                 Text(
                                     text = "المسافة من القاهرة: ${place.defaultRouteFromCairo.distanceKm} كم",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = Color(0xFF5F6368),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                 )
                             }
@@ -244,12 +244,12 @@ fun PlacesListScreen(
                                 modifier = Modifier
                                     .size(34.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFFE8F0FE))
+                                    .background(MaterialTheme.colorScheme.primaryContainer)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Directions,
                                     contentDescription = "عرض المسار",
-                                    tint = GoogleMapsBlue,
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }

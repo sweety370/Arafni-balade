@@ -112,6 +112,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val onlinePlaceDetails = MutableStateFlow<OnlinePlaceDetails?>(null)
     val isFetchingOnline = MutableStateFlow(false)
 
+    // Wikipedia Comprehensive Article Integration
+    val wikiArticleState = MutableStateFlow<com.example.data.model.FullWikiArticle?>(null)
+    val isWikiLoading = MutableStateFlow(false)
+
+    // Governorates Catalog Navigation State
+    val selectedGovernorateInfo = MutableStateFlow<com.example.data.model.EgyptGovernorateInfo?>(null)
+    val selectedPlaceForDialog = MutableStateFlow<com.example.data.model.EgyptGovernoratePlace?>(null)
+
     // Filtered verified places
     val places: StateFlow<List<Place>> = combine(searchQuery, selectedCategory) { query, cat ->
         var list = if (query.isBlank()) PlacesRepository.places else PlacesRepository.searchPlaces(query)
@@ -125,17 +133,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         initialValue = PlacesRepository.places
     )
 
+    val compassSensorManager = com.example.data.sensor.CompassSensorManager(application)
+    val compassState: StateFlow<com.example.data.sensor.CompassState> = compassSensorManager.compassState
+    val showCompassDialog = MutableStateFlow(false)
+
     init {
         // Start GPS updates if permission is granted
         if (locationTracker.hasLocationPermission()) {
             locationTracker.startTracking()
         }
 
-        // Monitor location during active navigation to update turn steps and arrival
+        compassSensorManager.start()
+
+        // Monitor location to update compass Qibla position and active navigation
         viewModelScope.launch {
             userLocation.collect { locState ->
-                if (isNavigating.value && locState.geoPoint != null && _activeRealRoute.value != null) {
-                    updateNavigationProgress(locState.geoPoint, _activeRealRoute.value!!)
+                val pt = locState.geoPoint
+                if (pt != null) {
+                    compassSensorManager.updateLocation(pt.latitude, pt.longitude)
+                }
+                if (isNavigating.value && pt != null && _activeRealRoute.value != null) {
+                    updateNavigationProgress(pt, _activeRealRoute.value!!)
                 }
             }
         }
@@ -144,6 +162,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     override fun onCleared() {
         super.onCleared()
         locationTracker.stopTracking()
+        compassSensorManager.stop()
     }
 
     fun onSearchQueryChanged(newQuery: String) {
@@ -455,7 +474,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val types = MapTileType.values()
         val curIndex = types.indexOf(mapTileType.value)
         val nextIndex = (curIndex + 1) % types.size
-        mapTileType.value = types[nextIndex]
+        val nextType = types[nextIndex]
+        mapTileType.value = nextType
+        if (nextType == MapTileType.CARTODB_DARK) {
+            isDarkTheme.value = true
+        } else if (isDarkTheme.value && nextType == MapTileType.STANDARD) {
+            isDarkTheme.value = false
+        }
+    }
+
+    fun setDarkTheme(enabled: Boolean) {
+        isDarkTheme.value = enabled
+        if (enabled) {
+            mapTileType.value = MapTileType.CARTODB_DARK
+        } else {
+            if (mapTileType.value == MapTileType.CARTODB_DARK) {
+                mapTileType.value = MapTileType.STANDARD
+            }
+        }
     }
 
     fun centerOnUserLocation() {
@@ -528,6 +564,43 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
             isFetchingOnline.value = false
         }
+    }
+
+    fun fetchWikipediaArticle(query: String, forceRefresh: Boolean = false) {
+        viewModelScope.launch {
+            isWikiLoading.value = true
+            val wikiCacheDao = db.wikiCacheDao()
+            val result = com.example.data.network.WikipediaService.fetchArticle(
+                query = query,
+                wikiCacheDao = wikiCacheDao,
+                forceRefresh = forceRefresh
+            )
+            if (result.isSuccess) {
+                wikiArticleState.value = result.getOrNull()
+            }
+            isWikiLoading.value = false
+        }
+    }
+
+    fun selectGovernorateInfo(gov: com.example.data.model.EgyptGovernorateInfo) {
+        selectedGovernorateInfo.value = gov
+        wikiArticleState.value = null
+        fetchWikipediaArticle(gov.nameAr)
+    }
+
+    fun clearGovernorateInfo() {
+        selectedGovernorateInfo.value = null
+        wikiArticleState.value = null
+    }
+
+    fun openPlaceDialog(place: com.example.data.model.EgyptGovernoratePlace) {
+        selectedPlaceForDialog.value = place
+        wikiArticleState.value = null
+        fetchWikipediaArticle(place.wikiSearchTerm ?: place.nameAr)
+    }
+
+    fun closePlaceDialog() {
+        selectedPlaceForDialog.value = null
     }
 
     fun openInfoDialog() {

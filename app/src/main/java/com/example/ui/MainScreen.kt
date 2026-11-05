@@ -13,10 +13,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Apartment
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +27,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,6 +44,9 @@ import androidx.compose.ui.unit.dp
 import com.example.ui.components.InfoCreditsDialog
 import com.example.ui.components.PlaceDetailSheet
 import com.example.ui.favorites.FavoritesScreen
+import com.example.ui.governorates.GovernorateDetailScreen
+import com.example.ui.governorates.GovernoratesCatalogScreen
+import com.example.ui.governorates.PlaceDetailDialog
 import com.example.ui.map.MapTopBarAndControls
 import com.example.ui.map.MapZoomAndLocationControls
 import com.example.ui.map.OsmMapView
@@ -51,7 +58,8 @@ import com.example.ui.theme.GoogleMapsBlue
 
 enum class MainTab(val titleAr: String, val icon: ImageVector) {
     MAP("الخريطة", Icons.Default.Map),
-    PLACES("دليل الأماكن", Icons.Default.Explore),
+    GOVERNORATES("المحافظات", Icons.Default.Apartment),
+    PLACES("الأماكن", Icons.Default.Explore),
     FAVORITES("المحفوظات", Icons.Default.Bookmark),
     SETTINGS("الإعدادات", Icons.Default.Settings)
 }
@@ -116,9 +124,95 @@ fun MainScreen(viewModel: MainViewModel) {
         }
     }
 
+    val selectedGovInfo by viewModel.selectedGovernorateInfo.collectAsState()
+    val selectedPlaceForDialog by viewModel.selectedPlaceForDialog.collectAsState()
+    val wikiArticle by viewModel.wikiArticleState.collectAsState()
+    val isWikiLoading by viewModel.isWikiLoading.collectAsState()
+
+    // Place detail dialog
+    if (selectedPlaceForDialog != null) {
+        PlaceDetailDialog(
+            place = selectedPlaceForDialog!!,
+            wikiArticle = wikiArticle,
+            isWikiLoading = isWikiLoading,
+            isOnline = isOnline,
+            onFetchWiki = {
+                val q = selectedPlaceForDialog!!.wikiSearchTerm ?: selectedPlaceForDialog!!.nameAr
+                viewModel.fetchWikipediaArticle(q, forceRefresh = true)
+            },
+            onViewOnMap = { p ->
+                viewModel.targetCenterGeo.value = p.location
+                viewModel.targetZoom.value = 14.5
+                viewModel.droppedPinLocation.value = p.location
+                viewModel.droppedPinAddress.value = "${p.nameAr}، ${p.cityNameAr}، ${p.governorateNameAr}"
+                selectedTab = 0
+            },
+            onGuideMe = { p ->
+                val dynamicPlace = com.example.data.model.Place(
+                    id = p.id,
+                    nameAr = p.nameAr,
+                    nameEn = p.type.titleAr,
+                    governorateAr = p.governorateNameAr,
+                    category = com.example.data.model.PlaceCategory.HISTORIC_CITIES,
+                    location = p.location,
+                    shortDescriptionAr = p.shortDescriptionAr,
+                    namingOriginAr = p.fullDescriptionAr,
+                    establishedDateAr = "معلم مصري موثق",
+                    whyEstablishedAr = p.shortDescriptionAr,
+                    egyptAffiliationAr = "جمهورية مصر العربية",
+                    historicEventsAr = p.fullDescriptionAr,
+                    rulersAndKingsAr = "",
+                    famousBornAr = "",
+                    visitingInfoAr = p.addressAr,
+                    ticketPriceAr = "-",
+                    openingHoursAr = "متاح",
+                    interestingFactsAr = emptyList(),
+                    bestTimeToVisitAr = "على مدار العام",
+                    defaultRouteFromCairo = com.example.data.model.RouteInfo(
+                        distanceKm = 0,
+                        durationCarMinutes = 0,
+                        durationBusMinutes = 0,
+                        durationTrainMinutes = null,
+                        mainHighwaysAr = emptyList(),
+                        waypoints = listOf(com.example.data.model.PlacesRepository.CAIRO_LOCATION, p.location),
+                        routeStops = emptyList(),
+                        travelTipsAr = emptyList()
+                    )
+                )
+                viewModel.selectPlace(dynamicPlace)
+                viewModel.calculateRouteTo(dynamicPlace)
+                selectedTab = 0
+            },
+            onDismissRequest = { viewModel.closePlaceDialog() }
+        )
+    }
+
+    // Credits/Info Dialog
+    val showCompassDialog by viewModel.showCompassDialog.collectAsState()
+    val compassState by viewModel.compassState.collectAsState()
+
+    if (showInfoDialog) {
+        InfoCreditsDialog(onDismissRequest = { viewModel.closeInfoDialog() })
+    }
+
+    if (showCompassDialog) {
+        com.example.ui.components.CompassAndQiblaDialog(
+            compassState = compassState,
+            gpsAccuracy = userLocation.accuracyMeters,
+            currentSpeedKmh = userLocation.speedKmh,
+            currentLocationName = if (userLocation.geoPoint != null) {
+                "موقعك المباشر في مصر (${String.format(java.util.Locale.US, "%.2f, %.2f", userLocation.geoPoint!!.latitude, userLocation.geoPoint!!.longitude)})"
+            } else {
+                "القاهرة، مصر (مرجع)"
+            },
+            onDismissRequest = { viewModel.showCompassDialog.value = false }
+        )
+    }
+
     // Handle system back button
-    BackHandler(enabled = isNavigating || activeRealRoute != null || selectedPlace != null || selectedTab != 0) {
+    BackHandler(enabled = isNavigating || activeRealRoute != null || selectedPlace != null || selectedGovInfo != null || selectedTab != 0) {
         when {
+            selectedGovInfo != null -> viewModel.clearGovernorateInfo()
             isNavigating -> viewModel.exitNavigation()
             activeRealRoute != null -> viewModel.clearRoute()
             selectedPlace != null -> viewModel.clearSelectedPlace()
@@ -126,14 +220,9 @@ fun MainScreen(viewModel: MainViewModel) {
         }
     }
 
-    // Credits/Info Dialog
-    if (showInfoDialog) {
-        InfoCreditsDialog(onDismissRequest = { viewModel.closeInfoDialog() })
-    }
-
     Scaffold(
         bottomBar = {
-            if (!isNavigating) {
+            if (!isNavigating && selectedGovInfo == null) {
                 NavigationBar(
                     containerColor = MaterialTheme.colorScheme.surface,
                     tonalElevation = 8.dp
@@ -254,6 +343,9 @@ fun MainScreen(viewModel: MainViewModel) {
                                             )
                                         )
                                     }
+                                },
+                                onOpenCompass = {
+                                    viewModel.showCompassDialog.value = true
                                 }
                             )
                         }
@@ -322,7 +414,42 @@ fun MainScreen(viewModel: MainViewModel) {
                 }
 
                 1 -> {
-                    // TAB 1: Places Directory & Exploration
+                    // TAB 1: Egypt Governorates Catalog & Detailed Wikipedia Screen
+                    if (selectedGovInfo != null) {
+                        GovernorateDetailScreen(
+                            governorate = selectedGovInfo!!,
+                            wikiArticle = wikiArticle,
+                            isWikiLoading = isWikiLoading,
+                            isOnline = isOnline,
+                            onFetchWiki = {
+                                viewModel.fetchWikipediaArticle(selectedGovInfo!!.nameAr, forceRefresh = true)
+                            },
+                            onBack = { viewModel.clearGovernorateInfo() },
+                            onShowOnMap = { gov ->
+                                viewModel.targetCenterGeo.value = gov.location
+                                viewModel.targetZoom.value = 11.5
+                                selectedTab = 0
+                            },
+                            onSelectPlace = { place ->
+                                viewModel.openPlaceDialog(place)
+                            }
+                        )
+                    } else {
+                        GovernoratesCatalogScreen(
+                            onSelectGovernorate = { gov ->
+                                viewModel.selectGovernorateInfo(gov)
+                            },
+                            onShowOnMap = { gov ->
+                                viewModel.targetCenterGeo.value = gov.location
+                                viewModel.targetZoom.value = 11.5
+                                selectedTab = 0
+                            }
+                        )
+                    }
+                }
+
+                2 -> {
+                    // TAB 2: Places Directory & Exploration
                     PlacesListScreen(
                         places = places,
                         searchQuery = searchQuery,
@@ -345,8 +472,8 @@ fun MainScreen(viewModel: MainViewModel) {
                     )
                 }
 
-                2 -> {
-                    // TAB 2: Saved Favorites & User Custom Notes
+                3 -> {
+                    // TAB 3: Saved Favorites & User Custom Notes
                     FavoritesScreen(
                         favorites = favorites,
                         onSelectPlace = { place ->
@@ -365,18 +492,18 @@ fun MainScreen(viewModel: MainViewModel) {
                             viewModel.updateFavoriteNote(placeId, note)
                         },
                         onExplorePlaces = {
-                            selectedTab = 1
+                            selectedTab = 2
                         }
                     )
                 }
 
-                3 -> {
-                    // TAB 3: Settings & Offline Cache Info
+                4 -> {
+                    // TAB 4: Settings & Offline Cache Info
                     SettingsScreen(
                         isDarkTheme = isDarkTheme,
                         showCityLabels = viewModel.showCityLabels.collectAsState().value,
                         isOnline = isOnline,
-                        onToggleDarkTheme = { viewModel.isDarkTheme.value = it },
+                        onToggleDarkTheme = { viewModel.setDarkTheme(it) },
                         onToggleCityLabels = { viewModel.showCityLabels.value = it },
                         onOpenInfoDialog = { viewModel.openInfoDialog() }
                     )

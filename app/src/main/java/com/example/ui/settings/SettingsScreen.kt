@@ -55,7 +55,7 @@ fun SettingsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F9FA))
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
@@ -67,13 +67,13 @@ fun SettingsScreen(
                 modifier = Modifier
                     .size(38.dp)
                     .clip(CircleShape)
-                    .background(Color(0xFFE8F0FE)),
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Settings,
                     contentDescription = null,
-                    tint = GoogleMapsBlue,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -82,13 +82,13 @@ fun SettingsScreen(
                 Text(
                     text = "الإعدادات",
                     style = MaterialTheme.typography.headlineMedium,
-                    color = Color(0xFF202124),
+                    color = MaterialTheme.colorScheme.onBackground,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = "تفضيلات العرض، نمط الخريطة، ومعلومات التطبيق",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF5F6368)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -96,8 +96,8 @@ fun SettingsScreen(
         // --- SPECIFIC INFO BUTTON / CARD (AMR HUSSEIN & MOHAMED HUSSEIN) ---
         Card(
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            border = BorderStroke(1.5.dp, GoogleMapsBlue),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
             elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
             modifier = Modifier
                 .fillMaxWidth()
@@ -118,13 +118,13 @@ fun SettingsScreen(
                         modifier = Modifier
                             .size(44.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFE8F0FE)),
+                            .background(MaterialTheme.colorScheme.primaryContainer),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Info,
                             contentDescription = "معلومات التطبيق",
-                            tint = GoogleMapsBlue,
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -133,19 +133,19 @@ fun SettingsScreen(
                         Text(
                             text = "معلومات التطبيق وفريق العمل (Info)",
                             style = MaterialTheme.typography.titleMedium,
-                            color = Color(0xFF202124),
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
                             text = "الفكرة: عمرو حسين | المبرمج: محمد حسين",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = GoogleMapsBlue,
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
                             text = "اضغط لعرض تفاصيل المشروع",
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFF5F6368)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -153,7 +153,7 @@ fun SettingsScreen(
                 Icon(
                     imageVector = Icons.Default.ChevronLeft,
                     contentDescription = null,
-                    tint = GoogleMapsBlue,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(22.dp)
                 )
             }
@@ -164,15 +164,15 @@ fun SettingsScreen(
         Text(
             text = "تفضيلات الخريطة",
             style = MaterialTheme.typography.titleMedium,
-            color = Color(0xFF202124),
+            color = MaterialTheme.colorScheme.onBackground,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
         Card(
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            border = BorderStroke(1.dp, Color(0xFFE8EAED)),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -187,21 +187,24 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Icon(imageVector = Icons.Default.Layers, contentDescription = null, tint = GoogleMapsBlue, modifier = Modifier.size(22.dp))
+                        Icon(imageVector = Icons.Default.Layers, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
-                            Text(text = "عناوين المراكز والمحافظات", style = MaterialTheme.typography.bodyLarge, color = Color(0xFF202124))
-                            Text(text = "إظهار أسماء المدن والمراكز الإدارية على الخريطة", style = MaterialTheme.typography.bodySmall, color = Color(0xFF5F6368))
+                            Text(text = "عناوين المراكز والمحافظات", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+                            Text(text = "إظهار أسماء المدن والمراكز الإدارية على الخريطة", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                     Switch(
                         checked = showCityLabels,
                         onCheckedChange = onToggleCityLabels,
-                        colors = SwitchDefaults.colors(checkedThumbColor = GoogleMapsBlue, checkedTrackColor = Color(0xFFD2E3FC))
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary
+                        )
                     )
                 }
 
-                HorizontalDivider(color = Color(0xFFF1F3F4), modifier = Modifier.padding(vertical = 10.dp))
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.padding(vertical = 10.dp))
 
                 // Dark Theme toggle
                 Row(
@@ -213,17 +216,20 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Icon(imageVector = Icons.Default.DarkMode, contentDescription = null, tint = Color(0xFF5F6368), modifier = Modifier.size(22.dp))
+                        Icon(imageVector = Icons.Default.DarkMode, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
                         Spacer(modifier = Modifier.width(12.dp))
                         Column {
-                            Text(text = "المظهر الداكن للخريطة", style = MaterialTheme.typography.bodyLarge, color = Color(0xFF202124))
-                            Text(text = "تفعيل الألوان الداكنة أثناء القيادة الليلية", style = MaterialTheme.typography.bodySmall, color = Color(0xFF5F6368))
+                            Text(text = "المظهر الداكن للخريطة", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
+                            Text(text = "تفعيل الوضع الليلي للخريطة والواجهة بالكامل", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                     Switch(
                         checked = isDarkTheme,
                         onCheckedChange = onToggleDarkTheme,
-                        colors = SwitchDefaults.colors(checkedThumbColor = GoogleMapsBlue, checkedTrackColor = Color(0xFFD2E3FC))
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary
+                        )
                     )
                 }
             }
@@ -231,33 +237,33 @@ fun SettingsScreen(
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        // Mapping Engine & Offline Caching Info
+        // Mapping Engine & Local Storage Info
         Surface(
             shape = RoundedCornerShape(14.dp),
-            color = Color(0xFFF1F3F4),
+            color = MaterialTheme.colorScheme.surfaceVariant,
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(modifier = Modifier.padding(14.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = if (isOnline) Icons.Default.Layers else Icons.Default.WifiOff,
+                        imageVector = Icons.Default.Layers,
                         contentDescription = null,
-                        tint = if (isOnline) Color(0xFF15803D) else Color(0xFF5F6368),
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = if (isOnline) "حالة الاتصال: متصل بالإنترنت (Online)" else "حالة الاتصال: بدون إنترنت (Offline)",
+                        text = "محرك الخرائط والموسوعة المصرية",
                         style = MaterialTheme.typography.titleSmall,
-                        color = if (isOnline) Color(0xFF15803D) else Color(0xFF202124),
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
                     )
                 }
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "• محرك الخرائط: OpenStreetMap الحقيقي مع دعم شوارع مصر، المباني، الجسور، ومحافظات النيل.\n• التخزين المؤقت: يتم حفظ البلاطات والخرائط تلقائياً على ذاكرة الجهاز للعمل عند انقطاع الإنترنت.\n• الملاحة: محرك OSRM الحسابي لتوجيه الطرق الواقعية والانعطافات خطوة بخطوة للسيارات والمشاة والدراجات.\n• البحث: دمج بين البحث الجغرافي المباشر وقاعدة بيانات المراكز والمحافظات المصرية.",
+                    text = "• محرك الخرائط: OpenStreetMap الحقيقي المخصص لجمهورية مصر العربية.\n• التوثيق الموسوعي: ربط مباشر مع ويكيبيديا العربية لتوفير مقالات ومعلومات موثقة وشاملة.\n• التخزين المحلي الذكي: حفظ المقالات والبيانات الجغرافية والمراكز للوصول السريع حتى دون اتصال.\n• الملاحة: محرك OSRM لحساب المسارات الواقعية والتوجيه خطوة بخطوة للسيارات والمشاة.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF475569)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

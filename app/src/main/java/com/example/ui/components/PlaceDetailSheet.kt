@@ -70,8 +70,9 @@ fun PlaceDetailSheet(
 ) {
     Card(
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 16.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = modifier
             .fillMaxWidth()
             .height(530.dp)
@@ -89,12 +90,12 @@ fun PlaceDetailSheet(
             ) {
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = Color(0xFFE8F0FE)
+                    color = MaterialTheme.colorScheme.primaryContainer
                 ) {
                     Text(
                         text = place.category.titleAr,
                         style = MaterialTheme.typography.labelSmall,
-                        color = GoogleMapsBlue,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                     )
@@ -105,7 +106,7 @@ fun PlaceDetailSheet(
                         .width(38.dp)
                         .height(4.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFDADCE0))
+                        .background(MaterialTheme.colorScheme.outlineVariant)
                 )
 
                 IconButton(
@@ -115,7 +116,7 @@ fun PlaceDetailSheet(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "إغلاق",
-                        tint = Color(0xFF5F6368),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -133,7 +134,7 @@ fun PlaceDetailSheet(
                     Text(
                         text = place.nameAr,
                         style = MaterialTheme.typography.headlineMedium,
-                        color = Color(0xFF202124),
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold
                     )
                     Row(
@@ -150,7 +151,7 @@ fun PlaceDetailSheet(
                         Text(
                             text = "محافظة ${place.governorateAr} • (${place.nameEn})",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color(0xFF5F6368)
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -160,12 +161,12 @@ fun PlaceDetailSheet(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFF1F3F4))
+                        .background(MaterialTheme.colorScheme.primaryContainer)
                 ) {
                     Icon(
                         imageVector = if (isFavorite) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
                         contentDescription = "المفضلة",
-                        tint = if (isFavorite) GoogleMapsBlue else Color(0xFF5F6368)
+                        tint = if (isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -175,17 +176,17 @@ fun PlaceDetailSheet(
             // Navigation Route Action Button
             Button(
                 onClick = onShowRoute,
-                colors = ButtonDefaults.buttonColors(containerColor = GoogleMapsBlue),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Icon(imageVector = Icons.Default.Directions, contentDescription = null, modifier = Modifier.size(20.dp))
+                Icon(imageVector = Icons.Default.Directions, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onPrimary)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "عرض مسار التنقل والوصول إلى هناك",
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
 
@@ -357,10 +358,12 @@ private fun HistorySectionCard(
     content: String,
     iconColor: Color
 ) {
+    if (content.isBlank()) return
+
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = Color(0xFFF8F9FA),
-        border = BorderStroke(1.dp, Color(0xFFE8EAED)),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
@@ -375,7 +378,7 @@ private fun HistorySectionCard(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleSmall,
-                    color = Color(0xFF202124),
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -383,7 +386,7 @@ private fun HistorySectionCard(
             Text(
                 text = content,
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF3C4043),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = MaterialTheme.typography.bodyMedium.lineHeight
             )
         }

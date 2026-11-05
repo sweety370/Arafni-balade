@@ -27,19 +27,26 @@ private val LightColorScheme = lightColorScheme(
 )
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Color(0xFF8AB4F8),
-    onPrimary = Color(0xFF174EA6),
-    primaryContainer = Color(0xFF1A73E8),
+    primary = Color(0xFF8AB4F8), // Luminous soft cobalt
+    onPrimary = Color(0xFF0D2552),
+    primaryContainer = Color(0xFF1E3A5F),
     onPrimaryContainer = Color(0xFFD2E3FC),
-    secondary = Color(0xFFF28B82),
-    onSecondary = Color(0xFF601410),
-    background = GoogleMapsLandDark,
-    onBackground = Color(0xFFE8EAED),
-    surface = GoogleMapsSurfaceDark,
-    onSurface = Color(0xFFE8EAED),
-    surfaceVariant = Color(0xFF303134),
-    onSurfaceVariant = Color(0xFFBDC1C6),
-    outline = Color(0xFF5F6368)
+    secondary = Color(0xFFF28B82), // Soft coral
+    onSecondary = Color(0xFF49120F),
+    secondaryContainer = Color(0xFF3C2020),
+    onSecondaryContainer = Color(0xFFFCE8E6),
+    tertiary = Color(0xFF81C995), // Sage emerald
+    onTertiary = Color(0xFF0A3818),
+    tertiaryContainer = Color(0xFF1A3D24),
+    onTertiaryContainer = Color(0xFFCEEAD6),
+    background = Color(0xFF121417), // Premium midnight background
+    onBackground = Color(0xFFE3E5E8),
+    surface = Color(0xFF1E2126), // Elevated dark card surface
+    onSurface = Color(0xFFF0F2F5),
+    surfaceVariant = Color(0xFF282C34), // Subtle elevated borders and pills
+    onSurfaceVariant = Color(0xFFC4C7C5),
+    outline = Color(0xFF3F444E),
+    outlineVariant = Color(0xFF2D3139)
 )
 
 @Composable

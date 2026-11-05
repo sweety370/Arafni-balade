@@ -23,6 +23,7 @@ import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.tileprovider.tilesource.XYTileSource
+import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint as OsmGeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
@@ -36,6 +37,14 @@ enum class MapTileType(val titleAr: String) {
     CARTODB_DARK("الوضع الليلي"),
     TOPO("تضاريس وطبوغرافيا")
 }
+
+// Bounding box strictly covering Egypt territory
+private val EGYPT_BOUNDS = BoundingBox(
+    32.0, // North (Mediterranean Sea Coast)
+    37.0, // East (Red Sea / Sinai border)
+    21.5, // South (Sudan border)
+    24.5  // West (Libya border)
+)
 
 fun GeoPoint.toOsm(): OsmGeoPoint = OsmGeoPoint(latitude, longitude)
 fun OsmGeoPoint.toDomain(): GeoPoint = GeoPoint(latitude, longitude)
@@ -68,12 +77,17 @@ fun OsmMapView(
         MapView(context).apply {
             setMultiTouchControls(true)
             zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
-            minZoomLevel = 4.5
+            // Limit zoom out so user cannot see the whole world, only Egypt
+            minZoomLevel = 5.8
             maxZoomLevel = 19.5
             isTilesScaledToDpi = true
-            controller.setZoom(6.5)
-            // Center of Egypt
-            controller.setCenter(OsmGeoPoint(26.8206, 30.8025))
+            // Confine scrolling strictly within Egypt bounds
+            setScrollableAreaLimitDouble(EGYPT_BOUNDS)
+            isHorizontalMapRepetitionEnabled = false
+            isVerticalMapRepetitionEnabled = false
+            controller.setZoom(6.8)
+            // Center of Egypt (Nile Valley / Cairo southward)
+            controller.setCenter(OsmGeoPoint(26.9, 30.8))
         }
     }
 
@@ -201,9 +215,14 @@ fun OsmMapView(
             val droppedMarker = Marker(mapView).apply {
                 position = droppedPinLocation.toOsm()
                 title = "موقع محدد على الخريطة"
-                snippet = "انقر لطلب مسار أو استكشاف المعالم القريبة"
+                snippet = "انقر لعرض تفاصيل الموقع وطلب مسار"
                 icon = MapMarkerHelper.createTeardropPin(context, 0xFF8E24AA.toInt(), iconSymbol = "📍")
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                setOnMarkerClickListener { _, _ ->
+                    val nearest = PlacesRepository.getNearestPlace(droppedPinLocation)
+                    onPlaceSelected(nearest)
+                    true
+                }
             }
             mapView.overlays.add(droppedMarker)
         }

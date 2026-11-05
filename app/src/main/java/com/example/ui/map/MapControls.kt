@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LocalCafe
 import androidx.compose.material.icons.filled.LocalGasStation
@@ -355,13 +356,30 @@ fun MapZoomAndLocationControls(
     onCycleMapTileType: () -> Unit = {},
     onZoomIn: () -> Unit,
     onZoomOut: () -> Unit,
-    onCenterOnUserLocation: () -> Unit
+    onCenterOnUserLocation: () -> Unit,
+    onOpenCompass: () -> Unit = {}
 ) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Compass and Qibla Button
+        FloatingActionButton(
+            onClick = onOpenCompass,
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = Color(0xFF10B981), // Emerald green for Qibla & Compass
+            elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp),
+            shape = CircleShape,
+            modifier = Modifier.size(46.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Explore,
+                contentDescription = "البوصلة وتحديد اتجاه القبلة للصلاة",
+                modifier = Modifier.size(24.dp)
+            )
+        }
+
         // Map Tile Type Switcher Button (OSM Standard, Carto Light, Dark, Topo)
         FloatingActionButton(
             onClick = onCycleMapTileType,
