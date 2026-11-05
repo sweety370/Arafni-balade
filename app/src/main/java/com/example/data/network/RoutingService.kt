@@ -26,7 +26,8 @@ data class RouteManeuver(
     val instructionAr: String,
     val distanceMeters: Double,
     val durationSeconds: Double,
-    val roadName: String
+    val roadName: String,
+    val location: GeoPoint? = null
 )
 
 data class RealRoute(
@@ -146,6 +147,10 @@ object RoutingService {
                             val maneuverObj = step.optJSONObject("maneuver")
                             val type = maneuverObj?.optString("type", "") ?: ""
                             val modifier = if (maneuverObj?.has("modifier") == true) maneuverObj.getString("modifier") else null
+                            val locArr = maneuverObj?.optJSONArray("location")
+                            val maneuverLoc = if (locArr != null && locArr.length() >= 2) {
+                                GeoPoint(locArr.getDouble(1), locArr.getDouble(0))
+                            } else null
 
                             val instructionAr = generateArabicInstruction(type, modifier, roadName, stepDist)
                             stepsList.add(
@@ -155,7 +160,8 @@ object RoutingService {
                                     instructionAr = instructionAr,
                                     distanceMeters = stepDist,
                                     durationSeconds = stepDur,
-                                    roadName = roadName
+                                    roadName = roadName,
+                                    location = maneuverLoc
                                 )
                             )
                         }
@@ -240,10 +246,11 @@ object RoutingService {
             waypoints.add(GeoPoint(lat, lng))
         }
 
+        val midPoint = waypoints.getOrNull(waypoints.size / 2) ?: start
         val steps = listOf(
-            RouteManeuver("depart", null, "انطلق باتجاه $destinationName", distanceMeters * 0.1, durationSeconds * 0.1, "الطريق الرئيسي"),
-            RouteManeuver("continue", "straight", "تابع السير نحو $destinationName لمسافة ${distanceKm.roundToInt()} كم", distanceMeters * 0.8, durationSeconds * 0.8, "طرق السفر المصرية"),
-            RouteManeuver("arrive", null, "الوصول إلى $destinationName", 0.0, 0.0, destinationName)
+            RouteManeuver("depart", null, "انطلق باتجاه $destinationName", distanceMeters * 0.1, durationSeconds * 0.1, "الطريق الرئيسي", location = start),
+            RouteManeuver("continue", "straight", "تابع السير نحو $destinationName لمسافة ${distanceKm.roundToInt()} كم", distanceMeters * 0.8, durationSeconds * 0.8, "طرق السفر المصرية", location = midPoint),
+            RouteManeuver("arrive", null, "الوصول إلى $destinationName", 0.0, 0.0, destinationName, location = end)
         )
 
         return RealRoute(
@@ -256,7 +263,7 @@ object RoutingService {
             geometry = waypoints,
             steps = steps,
             isRealRoadRoute = false,
-            summaryAr = "مسار تقديري مباشر (غير متصل بالإنترنت)"
+            summaryAr = "مسار تقديري جغرافي مباشر (بدون إنترنت - لا تتوفر ملاحة طرق مفصلة)"
         )
     }
 

@@ -92,6 +92,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     val isCalculatingRoute = MutableStateFlow(false)
     val routeTravelMode = MutableStateFlow(TravelMode.DRIVING)
+    val routeErrorMessage = MutableStateFlow<String?>(null)
 
     // Active Navigation HUD state
     val isNavigating = MutableStateFlow(false)
@@ -313,6 +314,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         isCalculatingRoute.value = true
 
         viewModelScope.launch {
+            routeErrorMessage.value = null
             val result = RoutingService.calculateRoute(
                 start = startLocation,
                 end = endLocation,
@@ -323,12 +325,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             result.onSuccess { route ->
                 _activeRealRoute.value = route
                 currentStepIndex.value = 0
-                distanceToNextManeuver.value = route.steps.firstOrNull()?.distanceMeters ?: 0.0
+                val firstManeuverLoc = route.steps.firstOrNull()?.location ?: route.destination
+                distanceToNextManeuver.value = RoutingService.calculateHaversineKm(startLocation, firstManeuverLoc) * 1000.0
                 isArrived.value = false
                 targetCenterGeo.value = route.origin
                 targetZoom.value = 13.0
-            }.onFailure {
-                // If service error occurs, use the realistic Egyptian corridor fallback
+                routeErrorMessage.value = null
+            }.onFailure { err ->
+                // Do not retry endlessly in a loop; show honest status and clear message
+                routeErrorMessage.value = "تعذر الاتصال بخدمة حساب الطرق عبر الإنترنت. تم عرض مسار تقديري تقريبي."
                 val fallback = RoutingService.calculateRoute(
                     start = startLocation,
                     end = endLocation,
@@ -388,6 +393,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _activeRealRoute.value = null
         isNavigating.value = false
         isArrived.value = false
+        routeErrorMessage.value = null
     }
 
     fun recalculateCurrentRoute() {
@@ -422,14 +428,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
-        // Check distance to next maneuver step
+        // Calculate REAL distance from current user GPS position to the upcoming maneuver location
         val steps = route.steps
         val curIndex = currentStepIndex.value
         if (curIndex in steps.indices) {
             val step = steps[curIndex]
-            // Advance step if user made progress
-            distanceToNextManeuver.value = (step.distanceMeters - 20.0).coerceAtLeast(0.0)
-            if (step.distanceMeters <= 20.0 && curIndex + 1 < steps.size) {
+            val maneuverTargetLoc = step.location
+                ?: if (curIndex + 1 in steps.indices) steps[curIndex + 1].location else route.destination
+
+            val actualDistMeters = if (maneuverTargetLoc != null) {
+                RoutingService.calculateHaversineKm(userPt, maneuverTargetLoc) * 1000.0
+            } else {
+                distanceToDestMeters
+            }
+
+            distanceToNextManeuver.value = actualDistMeters
+
+            // Transition to next maneuver when user reaches within 30 meters of this maneuver
+            if (actualDistMeters <= 30.0 && curIndex + 1 < steps.size) {
                 currentStepIndex.value = curIndex + 1
             }
         }

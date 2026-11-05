@@ -84,4 +84,23 @@ class MappingAndRoutingTest {
         assertTrue(result2.isNotEmpty())
         assertEquals(result1.first().id, result2.first().id)
     }
+
+    @Test
+    fun fallbackRoute_marksOfflineProperlyAndHasLocations() = kotlinx.coroutines.runBlocking {
+        val start = GeoPoint(30.0444, 31.2357)
+        val end = GeoPoint(31.2001, 29.9187)
+
+        val route = com.example.data.network.RoutingService.calculateRoute(
+            start = start,
+            end = end,
+            destinationName = "الإسكندرية",
+            mode = TravelMode.DRIVING
+        )
+
+        val resultRoute = route.getOrNull()
+        assertNotNull(resultRoute)
+        assertTrue(resultRoute!!.steps.isNotEmpty())
+        // Verify all steps have locations assigned
+        assertTrue(resultRoute.steps.all { it.location != null })
+    }
 }

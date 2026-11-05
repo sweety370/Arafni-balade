@@ -69,6 +69,7 @@ fun MainScreen(viewModel: MainViewModel) {
     val distanceToNextManeuver by viewModel.distanceToNextManeuver.collectAsState()
     val isArrived by viewModel.isArrived.collectAsState()
     val isCalculatingRoute by viewModel.isCalculatingRoute.collectAsState()
+    val routeErrorMessage by viewModel.routeErrorMessage.collectAsState()
 
     val mapTileType by viewModel.mapTileType.collectAsState()
     val isDarkTheme by viewModel.isDarkTheme.collectAsState()
@@ -282,6 +283,7 @@ fun MainScreen(viewModel: MainViewModel) {
                                 RoutePlanningCard(
                                     route = activeRealRoute!!,
                                     isCalculating = isCalculatingRoute,
+                                    errorMessage = routeErrorMessage,
                                     onSelectTravelMode = { mode ->
                                         viewModel.setTravelMode(mode)
                                     },

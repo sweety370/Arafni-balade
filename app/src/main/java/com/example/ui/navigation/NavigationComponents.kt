@@ -77,6 +77,7 @@ import kotlin.math.roundToInt
 fun RoutePlanningCard(
     route: RealRoute,
     isCalculating: Boolean = false,
+    errorMessage: String? = null,
     onSelectTravelMode: (TravelMode) -> Unit,
     onStartNavigation: () -> Unit,
     onClose: () -> Unit,
@@ -120,6 +121,36 @@ fun RoutePlanningCard(
                 }
                 IconButton(onClick = onClose) {
                     Icon(imageVector = Icons.Default.Close, contentDescription = "إغلاق")
+                }
+            }
+
+            if (!errorMessage.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Surface(
+                    color = Color(0xFFFEE2E2),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "⚠️ $errorMessage",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(0xFF991B1B),
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+            } else if (!route.isRealRoadRoute) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Surface(
+                    color = Color(0xFFFEF3C7),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "ℹ️ مسار تقديري مباشر: تم الحساب دون إنترنت كخط تقريبي. تتطلب ملاحة الشوارع الحقيقية اتصالاً بالإنترنت.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color(0xFF92400E),
+                        modifier = Modifier.padding(8.dp)
+                    )
                 }
             }
 
